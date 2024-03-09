@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"organiser/internal/config"
 	"organiser/internal/sorter"
 	"organiser/internal/util"
 	"os"
@@ -18,40 +19,6 @@ func main() {
 	}
 	downloadsPath := filepath.Join(homeDir, "Downloads/testORG")
 
-	extensionMap := map[string]string{
-		".pdf":  "Documents",
-		".docx": "Documents",
-		".doc":  "Documents",
-		".txt":  "Documents",
-		".webp": "Images",
-		".heic": "Images",
-		".gif":  "Images",
-		".svg":  "Images",
-		".png":  "Images",
-		".jpg":  "Images",
-		".jpeg": "Images",
-		".gz":   "Archives",
-		".zip":  "Archives",
-		".rar":  "Archives",
-		".jar":  "Archives",
-		".csv":  "Spreadsheets",
-		".xlsx": "Spreadsheets",
-		".xls":  "Spreadsheets",
-		".mp4":  "Media",
-		".mp3":  "Media",
-		".mov":  "Media",
-		".webm": "Media",
-		".exe":  "Installers",
-		".pkg":  "Installers",
-		".dmg":  "Installers",
-		".html": "Code",
-		".css":  "Code",
-		".xml":  "Code",
-		".js":   "Code",
-		".json": "Code",
-		".py":   "Code",
-	}
-
 	fmt.Println("getting files from: ", downloadsPath)
 	contents, err := util.GetAllContentsOfPath(downloadsPath)
 	if err != nil {
@@ -65,7 +32,7 @@ func main() {
 	for _, content := range contents {
 		if !content.IsDir() {
 			fileExt := filepath.Ext(content.Name())
-			success, err := sorter.SortFilesByExtension(downloadsPath, content, fileExt, extensionMap)
+			success, err := sorter.SortFilesByExtension(downloadsPath, content, fileExt, config.ExtensionMap)
 			if success {
 				successCount++
 			} else {
