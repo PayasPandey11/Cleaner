@@ -6,23 +6,33 @@ import (
 	"organiser/internal/config"
 	"organiser/internal/sorter"
 	"organiser/internal/util"
-	"os"
-	"path/filepath"
+	"os/exec"
+	"strings"
 )
 
 func main() {
-	fmt.Println("Organising files...")
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatalf("Unable to get home directory. Error: %v\n", err)
-	}
-	downloadsPath := filepath.Join(homeDir, "Downloads/testORG")
+	fmt.Println("Please select a directory.")
 
-	fmt.Println("Getting files from: ", downloadsPath)
-	contents, err := util.GetAllContentsOfPath(downloadsPath)
+	// AppleScript command to open Finder and ask the user to choose a folder
+	appleScript := `osascript -e 'tell application "Finder" to return POSIX path of (choose folder with prompt "Select the folder:")'`
+
+	// Execute the AppleScript command
+	cmd := exec.Command("bash", "-c", appleScript)
+	output, err := cmd.Output()
 	if err != nil {
-		log.Fatalf("Unable to get files from %s. Error: %v\n", downloadsPath, err)
+		fmt.Println("Error:", err)
+		return
 	}
 
-	sorter.SortFilesConcurrently(downloadsPath, contents, config.ExtensionMap)
+	selectedPath := strings.TrimSpace(string(output))
+
+	fmt.Println("You selected:", selectedPath)
+
+	contents, err := util.GetAllContentsOfPath(selectedPath)
+
+	if err != nil {
+		log.Fatalf("Unable to get files from %s. Error: %v\n", selectedPath, err)
+	}
+
+	sorter.SortFilesConcurrently(selectedPath, contents, config.ExtensionMap)
 }
